@@ -166,11 +166,11 @@ watch(
 </script>
 
 <template>
-  <div class="min-h-screen bg-neutral-800 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-neutral-600 py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto">
       <!-- Header -->
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-300">Obscura</h1>
+        <h1 class="text-4xl font-bold text-gray-300">Obscura</h1>
         <p class="mt-2 text-gray-300">Secure Password Generator 🔐</p>
       </div>
 
@@ -252,7 +252,7 @@ watch(
           </div>
         </div>
 
-        <!-- Boutons -->
+        <!-- Action Boutons -->
         <div class="mt-6 flex flex-wrap gap-4">
           <button
             @click="generatePassword"
@@ -307,6 +307,34 @@ watch(
             </tbody>
           </table>
         </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="mt-6 text-justify text-gray-300 font-medium text-sm">
+        <p>
+          <strong>Obscura</strong> is a modern, open-source password generator focused on privacy,
+          entropy, and cryptographic safety. All passwords are generated locally in your browser
+          using the <code>window.crypto</code> API —
+          <span class="font-extrabold">no data is ever stored or sent to any server</span>.
+        </p>
+        <p class="mt-2">
+          Each password is evaluated with real-time entropy calculations to ensure strength and
+          resistance to brute-force attacks. With full control over character types, exclusions
+          (like similar or sequential characters), and optional constraints (like starting with a
+          letter), <strong>Obscura</strong> gives you the power to generate passwords that are both
+          secure and readable.
+        </p>
+        <p class="mt-4">
+          © {{ new Date().getFullYear() }} Obscura • Made with ❤️ by Denis Akpagnonite •
+          <a
+            href="https://github.com/denisakp/obscura"
+            target="_blank"
+            class="text-blue-400 underline hover:text-blue-400"
+          >
+            View source on GitHub
+          </a>
+          • Released under the MIT License.
+        </p>
       </div>
     </div>
   </div>
