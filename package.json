@@ -1,8 +1,8 @@
 {
   "name": "obscura",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
-    "email": "akpagnonited@gmail.com",
+    "email": "contact@denisakp.me",
     "name": "Akpagnonite Denis",
     "url": "https://denisakp.me"
   },
@@ -12,7 +12,7 @@
   },
   "bugs": {
     "url": "https://github.com/denisakp/obscura/issues",
-    "email": "akpagnonited@gmail.com"
+    "email": "bugs@denisakp.me"
   },
   "homepage": "https://obscura.denisakp.me",
   "description": "A client-side password generator built with Vue 3 and Vite. It allows users to create strong, customizable passwords based on best security practices. ",
