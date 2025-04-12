@@ -4,14 +4,15 @@ import { mount } from '@vue/test-utils'
 import ObscuraUi from '@/components/ObscuraUi.vue'
 
 // Mock the generatePasswords function
-vi.mock("@/utils/obscura", () => ({
+vi.mock('@/utils/obscura', () => ({
   generatePasswords: vi.fn().mockImplementation((options) => {
-    return Array(options.quantity).fill(0).map((_, i) => `password-${i+1}`)
-  })
-}));
+    return Array(options.quantity)
+      .fill(0)
+      .map((_, i) => `password-${i + 1}`)
+  }),
+}))
 
 describe('ObscuraUi component tests', () => {
-
   it('renders properly', () => {
     const wrapper = mount(ObscuraUi, {})
     expect(wrapper.text()).toContain('Obscura')
