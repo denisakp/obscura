@@ -286,7 +286,7 @@ watch(
 
       <!-- Results -->
       <div class="mt-6">
-        <h2 class="text-lg font-medium text-white mb-2">Your New Passwords:</h2>
+        <h2 class="text-lg font-medium text-white mb-2">Output:</h2>
         <div class="border bg-white shadow border-gray-300 rounded-md overflow-hidden">
           <table class="w-full">
             <tbody>
