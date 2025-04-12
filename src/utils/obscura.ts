@@ -88,17 +88,17 @@ function getRandomChar(pool: string): string {
 function generatePassword(options: PasswordOptions): string {
   const pool: string = getCharacterPool(options)
   if (pool.length === 0) {
-    throw new Error('Au moins un type de caractère doit être sélectionné.')
+    throw new Error('At least one character type must be selected.')
   }
 
-  // Vérifier que la longueur demandée est compatible avec l'option "noDuplicateCharacters"
+  // Check that the requested length is compatible with the "noDuplicateCharacters" option
   if (options.noDuplicateCharacters && options.length > pool.length) {
     throw new Error(
-      `Impossible de générer un mot de passe de ${options.length} caractères sans doublons avec seulement ${pool.length} caractères disponibles.`,
+      `Cannot generate a password of ${options.length} characters without duplicates using only ${pool.length} available characters.`,
     )
   }
 
-  // Créer des pools séparés pour la première lettre si nécessaire
+  // Create separate pools for the first letter if needed
   let firstCharPool = pool
   if (options.beginWithLetter) {
     firstCharPool = ''
@@ -112,38 +112,38 @@ function generatePassword(options: PasswordOptions): string {
     }
     if (firstCharPool.length === 0) {
       throw new Error(
-        'Pour commencer par une lettre, les lettres majuscules ou minuscules doivent être activées.',
+        'To start with a letter, either uppercase or lowercase letters must be enabled.',
       )
     }
   }
 
-  // Générer le mot de passe
+  // Generate password
   let attempts = 0
-  const maxAttempts = 100 // Éviter une boucle infinie
+  const maxAttempts = 100 //Avoid an infinite loop
 
   while (attempts < maxAttempts) {
     attempts++
     const result: string[] = []
     const usedChars = new Set<string>()
 
-    // Générer le premier caractère
+    // Generate the first character
     const firstChar = getRandomChar(firstCharPool)
     result.push(firstChar)
     if (options.noDuplicateCharacters) {
       usedChars.add(firstChar)
     }
 
-    // Générer le reste des caractères
+    // Generate the rest of the characters
     for (let i = 1; i < options.length; i++) {
       let nextChar: string
-      let maxTries = 50 // Éviter une boucle infinie pour trouver un caractère unique
+      let maxTries = 50 // Avoid an infinite loop to find a unique character
 
       do {
         nextChar = getRandomChar(pool)
         maxTries--
       } while (options.noDuplicateCharacters && usedChars.has(nextChar) && maxTries > 0)
 
-      // Si on ne peut pas trouver un caractère unique, recommencer
+      // If you can't find a unique character, start over.
       if (options.noDuplicateCharacters && usedChars.has(nextChar)) {
         break
       }
@@ -154,24 +154,22 @@ function generatePassword(options: PasswordOptions): string {
       }
     }
 
-    // Vérifier que nous avons la bonne longueur
+    // Check that we have the correct length
     if (result.length < options.length) {
-      continue // Recommencer si le mot de passe est trop court
+      continue //Retry if the password is too short
     }
 
     const password = result.join('')
 
-    // Vérifier les séquences de caractères si nécessaire
+    // Check character sequences if necessary
     if (options.noSequentialCharacters && hasSequentialCharacters(password)) {
-      continue // Recommencer si des séquences sont détectées
+      continue // Restart if sequences are detected
     }
 
     return password
   }
 
-  throw new Error(
-    'Impossible de générer un mot de passe répondant à tous les critères après plusieurs tentatives.',
-  )
+  throw new Error('Unable to generate a password that meets all criteria after multiple attempts.')
 }
 
 /**
@@ -186,7 +184,7 @@ function generatePassword(options: PasswordOptions): string {
  * @throws {Error} If password generation fails (inherited from generatePassword)
  */
 export function generatePasswords(options: PasswordOptions): string[] {
-  // Garantir que la longueur est entre 8 et 64 (selon les spécifications)
+  // Ensure length is between 8 and 64 (as per specifications)
   const safeLength = Math.max(8, Math.min(options.length, 64))
   const passwords: string[] = []
 
