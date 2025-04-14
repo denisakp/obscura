@@ -1,5 +1,9 @@
 import { test, expect, describe } from 'vitest'
-import { generatePasswords, type PasswordOptions } from '@/utils/obscura.ts'
+import {
+  generatePasswords,
+  validatePasswordOptions,
+  type PasswordOptions,
+} from '@/utils/obscura.ts'
 
 describe('Test obscura utility', () => {
   const defaultOptions: PasswordOptions = {
@@ -14,6 +18,62 @@ describe('Test obscura utility', () => {
     beginWithLetter: false,
     quantity: 1,
   }
+
+  // Test validation function separately
+  describe('validatePasswordOptions', () => {
+    test('should validate valid options', () => {
+      const validation = validatePasswordOptions(defaultOptions)
+      expect(validation.valid).toBe(true)
+      expect(validation.message).toBe('')
+    })
+
+    test('should reject when no character types are selected', () => {
+      const options = {
+        ...defaultOptions,
+        includeLowercase: false,
+        includeUppercase: false,
+        includeDigits: false,
+        includeSymbols: false,
+      }
+
+      const validation = validatePasswordOptions(options)
+      expect(validation.valid).toBe(false)
+      expect(validation.message).toBe('At least one character type must be selected.')
+    })
+
+    test('should reject when pool is too small for unique characters', () => {
+      const options = {
+        ...defaultOptions,
+        includeLowercase: false,
+        includeUppercase: false,
+        includeSymbols: false,
+        includeDigits: true, // Only digits (10 characters)
+        noDuplicateCharacters: true,
+        length: 12, // More than available digits
+      }
+
+      const validation = validatePasswordOptions(options)
+      expect(validation.valid).toBe(false)
+      expect(validation.message).toContain(
+        'Cannot generate a password of 12 characters without duplicates',
+      )
+    })
+
+    test('should reject when beginWithLetter is true but no letter types are enabled', () => {
+      const options = {
+        ...defaultOptions,
+        includeLowercase: false,
+        includeUppercase: false,
+        beginWithLetter: true,
+      }
+
+      const validation = validatePasswordOptions(options)
+      expect(validation.valid).toBe(false)
+      expect(validation.message).toBe(
+        'To start with a letter, either uppercase or lowercase letters must be enabled.',
+      )
+    })
+  })
 
   // Test edge cases for quantity parameter
   test('should generate no passwords when quantity is 0', () => {
@@ -138,7 +198,7 @@ describe('Test obscura utility', () => {
     }
   })
 
-  // Test for expected errors
+  // Test for expected errors with updated error messages
   test('should throw error when no character types are selected', () => {
     const options = {
       ...defaultOptions,
@@ -149,7 +209,7 @@ describe('Test obscura utility', () => {
     }
 
     expect(() => generatePasswords(options)).toThrow(
-      'Au moins un type de caractère doit être sélectionné',
+      'At least one character type must be selected.',
     )
   })
 
@@ -161,10 +221,11 @@ describe('Test obscura utility', () => {
       beginWithLetter: true,
     }
 
-    expect(() => generatePasswords(options)).toThrow('Pour commencer par une lettre')
+    expect(() => generatePasswords(options)).toThrow(
+      'To start with a letter, either uppercase or lowercase letters must be enabled.',
+    )
   })
 
-  // Fix for the failing test
   test('should throw error when pool is too small for unique characters', () => {
     const options = {
       ...defaultOptions,
@@ -175,7 +236,9 @@ describe('Test obscura utility', () => {
       length: 12, // More than the 10 available digits
     }
 
-    expect(() => generatePasswords(options)).toThrow('Impossible de générer un mot de passe')
+    expect(() => generatePasswords(options)).toThrow(
+      'Cannot generate a password of 12 characters without duplicates',
+    )
   })
 
   // Test the minimum length override behavior
