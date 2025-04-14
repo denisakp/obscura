@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, watch } from 'vue'
 
-import { type PasswordOptions, generatePasswords } from '@/utils/obscura.ts'
+import {
+  type PasswordOptions,
+  generatePasswords,
+  validatePasswordOptions,
+} from '@/utils/obscura.ts'
 
 type OptionKey = keyof PasswordOptions | 'autoGenerate' | 'savePreferences'
 
@@ -10,6 +14,10 @@ type CheckBoxOption = {
   label: string
   description: string
 }
+
+// add error state
+const error = ref<string | null>(null)
+const showErrorModal = ref(false)
 
 const options = reactive<PasswordOptions>({
   length: 12,
@@ -82,11 +90,32 @@ const savePreferences = ref(false)
 const passwords = ref<string[]>([])
 
 const generatePassword = () => {
+  error.value = null
+
   try {
+    // validate options before generating passwords
+    const validation = validatePasswordOptions(options)
+    if (!validation.valid) {
+      error.value = validation.message
+      showErrorModal.value = true
+      return
+    }
+
     passwords.value = generatePasswords(options)
-  } catch (error) {
+  } catch (err) {
+    if (err instanceof Error) {
+      error.value = err.message
+    } else {
+      error.value = 'An unknown error occurred'
+    }
+    showErrorModal.value = true
     console.error('Error generating passwords:', error)
   }
+}
+
+const closeErrorModal = () => {
+  showErrorModal.value = false
+  error.value = null
 }
 
 const copyFirstPassword = () => {
@@ -123,6 +152,7 @@ const loadPreferences = () => {
 const downloadPasswordAsTxt = () => {
   if (passwords.value.length === 0) {
     generatePassword()
+    if (error.value) return // stop if generation failed
   }
 
   const text = passwords.value.join('\n')
@@ -142,10 +172,10 @@ const downloadPasswordAsTxt = () => {
 }
 
 onMounted(() => {
+  loadPreferences() // try to load saved preferences on mount before auto-generating
   if (autoGenerate.value) {
     generatePassword()
   }
-  loadPreferences()
 })
 
 watch(savePreferences, (newVal) => {
@@ -335,6 +365,42 @@ watch(
           </a>
           • Released under the MIT License.
         </p>
+      </div>
+
+      <!-- Error Modal -->
+      <div
+        v-if="showErrorModal"
+        class="fixed inset-0 bg-black bg-opacity-50! flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-lg shadow-xl max-w-full p-6">
+          <div class="flex items-start justify-between">
+            <h3 class="text-lg font-medium text-red-400">Error</h3>
+            <button @click="closeErrorModal" class="text-gray-400 hover:text-gray-500">
+              <span class="sr-only">Close</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="mt-3">
+            <p class="text-sm text-gray-600">{{ error }}</p>
+          </div>
+
+          <div class="mt-4">
+            <button
+              @click="closeErrorModal"
+              class="w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -17,12 +17,60 @@ export interface PasswordOptions {
   quantity: number
 }
 
+export interface ValidationResult {
+  valid: boolean
+  message: string
+}
+
+/**
+ * Validates the password options before generation to ensure they're compatible.
+ * @param options - The password generation options to validate
+ * @returns {ValidationResult} An object indicating whether the options are valid and an optional message
+ */
+export function validatePasswordOptions(options: PasswordOptions): ValidationResult {
+  const pool = getCharacterPool(options)
+
+  // ccheck if any character types are selected
+  if (pool.length === 0) {
+    return { valid: false, message: 'At least one character type must be selected.' }
+  }
+
+  // check compatibility with noDuplicateCharacters
+  if (options.noDuplicateCharacters && options.length > pool.length) {
+    return {
+      valid: false,
+      message: `Cannot generate a password of ${options.length} characters without duplicates using only ${pool.length} available characters.`,
+    }
+  }
+
+  // check if beginWithLetter is compatible with the selected character types
+  if (options.beginWithLetter) {
+    let firstCharPool = ''
+    if (options.includeLowercase) firstCharPool += LOWERCASE
+    if (options.includeUppercase) firstCharPool += UPPERCASE
+    if (options.excludeSimilarCharacters) {
+      firstCharPool = firstCharPool
+        .split('')
+        .filter((c) => !SIMILAR.includes(c))
+        .join('')
+    }
+    if (firstCharPool.length === 0) {
+      return {
+        valid: false,
+        message: 'To start with a letter, either uppercase or lowercase letters must be enabled.',
+      }
+    }
+  }
+
+  return { valid: true, message: '' }
+}
+
 /**
  * Creates a character pool based on the provided password options.
  * @param options - The password generation options.
  * @returns A string containing all characters that can be used for password generation.
  */
-function getCharacterPool(options: PasswordOptions): string {
+export function getCharacterPool(options: PasswordOptions): string {
   let pool = ''
   if (options.includeLowercase) pool += LOWERCASE
   if (options.includeUppercase) pool += UPPERCASE
@@ -86,6 +134,12 @@ function getRandomChar(pool: string): string {
  * @throws {Error} If a password meeting all criteria cannot be generated after multiple attempts
  */
 function generatePassword(options: PasswordOptions): string {
+  // validate options first
+  const validationResult = validatePasswordOptions(options)
+  if (!validationResult.valid) {
+    throw new Error(validationResult.message)
+  }
+
   const pool: string = getCharacterPool(options)
   if (pool.length === 0) {
     throw new Error('At least one character type must be selected.')
